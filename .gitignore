@@ -1,0 +1,10 @@
+node_modules/
+*.db-journal
+*.db-wal
+*.db-shm
+*.pdf
+pdf_images/
+patti_pages/
+page_*.png
+extract_pages.py
+_extract_pdf2.py

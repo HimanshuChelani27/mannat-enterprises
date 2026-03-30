@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Mannat Enterprises</title>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">Mannat <span>Enterprises</span></div>
+      <nav class="sidebar-nav">
+        <a onclick="showSection('dashboard')" class="active" id="nav-dashboard"><span class="icon">&#127968;</span> Dashboard</a>
+        <a onclick="showSection('categories')" id="nav-categories"><span class="icon">&#128193;</span> Categories</a>
+        <a onclick="showSection('subcategories')" id="nav-subcategories"><span class="icon">&#128194;</span> Subcategories</a>
+        <a onclick="showSection('products')" id="nav-products"><span class="icon">&#128230;</span> Products</a>
+        <a onclick="showSection('qrcodes')" id="nav-qrcodes"><span class="icon">&#9638;</span> QR Codes</a>
+        <a onclick="showSection('settings')" id="nav-settings"><span class="icon">&#9881;</span> Settings</a>
+        <a href="/" target="_blank"><span class="icon">&#127760;</span> View Website</a>
+        <a href="/admin/logout"><span class="icon">&#128682;</span> Logout</a>
+      </nav>
+    </aside>
+
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">&#9776;</button>
+
+    <!-- Main -->
+    <main class="admin-main">
+
+      <!-- DASHBOARD -->
+      <div class="page-section active" id="section-dashboard">
+        <div class="admin-topbar">
+          <h1>Dashboard</h1>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Category</th><th>Products</th><th>Actions</th></tr></thead>
+            <tbody id="dashCategoriesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CATEGORIES -->
+      <div class="page-section" id="section-categories">
+        <div class="admin-topbar">
+          <h1>Categories</h1>
+          <div class="actions"><button class="btn btn-primary" onclick="openCategoryModal()">+ Add Category</button></div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Image</th><th>Name</th><th>Order</th><th>Actions</th></tr></thead>
+            <tbody id="categoriesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBCATEGORIES -->
+      <div class="page-section" id="section-subcategories">
+        <div class="admin-topbar">
+          <h1>Subcategories</h1>
+          <div class="actions"><button class="btn btn-primary" onclick="openSubcategoryModal()">+ Add Subcategory</button></div>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <select id="subcatFilterCategory" onchange="loadSubcategories()" style="padding: 8px 14px; border: 1.5px solid var(--gray-200); border-radius: 6px;">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Name</th><th>Category</th><th>Order</th><th>Actions</th></tr></thead>
+            <tbody id="subcategoriesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="page-section" id="section-products">
+        <div class="admin-topbar">
+          <h1>Products</h1>
+          <div class="actions"><button class="btn btn-primary" onclick="openProductForm()">+ Add Product</button></div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+          <select id="prodFilterCategory" onchange="onProdCategoryFilter()" style="padding: 8px 14px; border: 1.5px solid var(--gray-200); border-radius: 6px;">
+            <option value="">All Categories</option>
+          </select>
+          <select id="prodFilterSubcategory" onchange="loadProducts()" style="padding: 8px 14px; border: 1.5px solid var(--gray-200); border-radius: 6px;">
+            <option value="">All Subcategories</option>
+          </select>
+          <input type="text" id="prodSearchInput" placeholder="Search products..." onkeyup="loadProducts()" style="padding: 8px 14px; border: 1.5px solid var(--gray-200); border-radius: 6px; flex: 1; min-width: 150px;">
+        </div>
+        <div id="productsList"></div>
+        <!-- Product Form (hidden by default) -->
+        <div id="productFormContainer" style="display:none;"></div>
+      </div>
+
+      <!-- QR CODES -->
+      <div class="page-section" id="section-qrcodes">
+        <div class="admin-topbar">
+          <h1>QR Code Generator</h1>
+        </div>
+        <div class="form-card">
+          <h3 style="margin-bottom: 15px;">Generate QR for Homepage</h3>
+          <div class="form-group">
+            <label>Website URL (use your domain after hosting)</label>
+            <input type="text" id="qrBaseUrl" placeholder="http://localhost:3000" value="">
+          </div>
+          <button class="btn btn-primary" onclick="generateCustomQR()">Generate QR</button>
+          <div id="qrHomeResult" style="margin-top: 20px; text-align: center;"></div>
+        </div>
+        <div class="form-card">
+          <h3 style="margin-bottom: 15px;">Product QR Codes</h3>
+          <p style="color: var(--gray-500); margin-bottom: 15px;">Select a product to generate its QR code for printing on boxes.</p>
+          <select id="qrProductSelect" onchange="generateProductQR()" style="padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 6px; width: 100%; margin-bottom: 15px;">
+            <option value="">Select a product</option>
+          </select>
+          <div id="qrProductResult" style="text-align: center;"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page-section" id="section-settings">
+        <div class="admin-topbar">
+          <h1>Settings</h1>
+        </div>
+        <div class="form-card">
+          <h3 style="margin-bottom: 15px;">Business Information</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Business Name</label>
+              <input type="text" id="set_business_name">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="set_phone">
+            </div>
+            <div class="form-group">
+              <label>WhatsApp Number (with country code)</label>
+              <input type="text" id="set_whatsapp" placeholder="+919876543210">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="set_email">
+            </div>
+            <div class="form-group full">
+              <label>Address</label>
+              <input type="text" id="set_address">
+            </div>
+            <div class="form-group full">
+              <label>Tagline</label>
+              <input type="text" id="set_tagline">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+        <div class="form-card">
+          <h3 style="margin-bottom: 15px;">Change Password</h3>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currentPassword">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPassword">
+          </div>
+          <button class="btn btn-primary" onclick="changePassword()">Change Password</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
